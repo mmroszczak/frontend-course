@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react'
 import phonebookServices from './services/phonebook'
+import './index.css'
+
+const Notification = ({ message, className }) => {
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className={className}>
+      {message}
+    </div>
+  )
+}
 
 const Filter = ( {changeHandler} ) => {
   return(
@@ -46,6 +59,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setNewFilter] = useState('')
   const [persons, setPersons] = useState([])
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [notificationType, setNotificationType] = useState('')
 
 
   useEffect(() => {
@@ -63,7 +78,9 @@ const App = () => {
 
   const handleDeletion = (id) => {
 
+
     const person = persons.find(p => p.id === id)
+    console.log(id)
 
     if(window.confirm(`Do you really want to delete ${person.name} from the phonebook?`)){
 
@@ -71,9 +88,26 @@ const App = () => {
       .then(id => {
         const updatedPersons = persons.filter(p => p.id ==! id)
         setPersons(updatedPersons)
+        setNotificationType('confirm')
+        setNotificationMessage(
+          `Person '${person.name}' was removed from the phonebook`
+        )
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
+
       })
       .catch(error => {
-        alert(`The person ${person.name} has been previously removed from the phonebook.`)
+        {
+          setNotificationType('error')
+          setNotificationMessage(
+            `'${person.name}' was already removed from server`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+          setNotes(notes.filter(n => n.id !== id))
+        }
         const updatedPersons = persons.filter(p => p.id ==! id)
         setPersons(updatedPersons)
       })
@@ -94,6 +128,16 @@ const App = () => {
           const updatedPersons = persons.map(p => p.name === returnedPerson.name ? returnedPerson : p)
           setPersons(updatedPersons)
         })
+        .catch(error => {
+          setNotificationType('error')
+          setNotificationMessage(
+            `'${newPerson.name}' was removed from server`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+          setPersons(persons.filter(p => p.id !== id))
+        })
       }
     }
     else{
@@ -102,6 +146,13 @@ const App = () => {
         setPersons(persons.concat(newPerson))
         setNewName('')
         setNewNumber('')
+        setNotificationType('confirm')
+        setNotificationMessage(
+          `Person '${newPerson.name}' was added to the phonebook`
+        )
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 5000)
       })
     }
 
@@ -117,11 +168,12 @@ const personsToShow = persons.filter(person => person.name.toLowerCase().startsW
   return (
     <div>
       <h2>Phonebook</h2>
-        <Filter changeHandler={() => handleFilterChange()}/>
+      <Notification message={notificationMessage} className={notificationType} />
+        <Filter changeHandler={handleFilterChange}/>
       <h3>Add New</h3>
-        <PersonForm submitHandler={() => addName()} nameChangeHandler={() => handleNameChange()} numberChangeHandler={() => handleNumberChange()}/>
+        <PersonForm submitHandler={addName} nameChangeHandler={handleNameChange} numberChangeHandler={handleNumberChange}/>
       <h2>Numbers</h2>
-        <Persons personsToShow={personsToShow} deleteHandler={() => handleDeletion()}/>
+        <Persons personsToShow={personsToShow} deleteHandler={handleDeletion}/>
  
     </div>
   )
