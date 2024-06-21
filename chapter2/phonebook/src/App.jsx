@@ -1,8 +1,44 @@
 import { useState, useEffect } from 'react'
 import phonebookServices from './services/phonebook'
-import Filter from './components/Filter'
-import PersonForm from './components/PersonForm'
-import Persons from './components/Persons'
+
+const Filter = ( {changeHandler} ) => {
+  return(
+  <div>
+    Filter shown with <input onChange={changeHandler}/>
+  </div>
+  )
+  }
+
+const PersonForm = ( { submitHandler, nameChangeHandler, numberChangeHandler } ) => {
+  return(
+    <form onSubmit={submitHandler}>
+        <div>
+          name: <input onChange={nameChangeHandler}/>
+        </div>
+        <div>
+          number: <input onChange={numberChangeHandler}/>
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+  )
+}
+
+const Persons = ( {personsToShow, deleteHandler} ) => {
+  return(
+    
+    personsToShow.map(person => 
+      <p key={person.name}>
+
+      {person.name} {person.number}
+      <button onClick={() => deleteHandler(person.id)}>Delete</button>
+
+      </p>
+    )
+
+  )
+}
 
 const App = () => {
 
@@ -64,9 +100,6 @@ const App = () => {
       phonebookServices.create(newPerson)
       .then(newPerson => {
         setPersons(persons.concat(newPerson))
-      }
-      )
-      .then(() => {
         setNewName('')
         setNewNumber('')
       })
@@ -84,11 +117,11 @@ const personsToShow = persons.filter(person => person.name.toLowerCase().startsW
   return (
     <div>
       <h2>Phonebook</h2>
-        <Filter changeHandler={handleFilterChange}/>
+        <Filter changeHandler={() => handleFilterChange()}/>
       <h3>Add New</h3>
-        <PersonForm submitHandler={addName} nameChangeHandler={handleNameChange} numberChangeHandler={handleNumberChange}/>
+        <PersonForm submitHandler={() => addName()} nameChangeHandler={() => handleNameChange()} numberChangeHandler={() => handleNumberChange()}/>
       <h2>Numbers</h2>
-        <Persons personsToShow={personsToShow} deleteHandler={handleDeletion}/>
+        <Persons personsToShow={personsToShow} deleteHandler={() => handleDeletion()}/>
  
     </div>
   )
