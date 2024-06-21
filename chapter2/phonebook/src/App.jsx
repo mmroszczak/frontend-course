@@ -1,70 +1,20 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
-
-const Person = ( {person } ) => {
-  return(
-  <>
-    
-  </>
-  )
-}
-
-const Filter = ( {changeHandler} ) => {
-return(
-<div>
-  Filter shown with <input onChange={changeHandler}/>
-</div>
-)
-}
-
-const PersonForm = ( { submitHandler, nameChangeHandler, numberChangeHandler } ) => {
-  return(
-    <form onSubmit={submitHandler}>
-        <div>
-          name: <input onChange={nameChangeHandler}/>
-        </div>
-        <div>
-          number: <input onChange={numberChangeHandler}/>
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-  )
-}
-
-const Persons = ( {personsToShow} ) => {
-  return(
-    
-    personsToShow.map(person => 
-      <p key={person.name}>
-
-      {person.name} {person.number}
-
-      </p>
-    )
-
-  )
-}
+import phonebookServices from './services/phonebook'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
 const App = () => {
 
-  const [persons, setPersons] = useState([])
-
-  // const [persons, setPersons] = useState([
-  //   { name: 'Arto Hellas', number: '040-123456', id: 1 },
-  //   { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-  //   { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-  //   { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  // ]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setNewFilter] = useState('')
+  const [persons, setPersons] = useState([])
+
 
   useEffect(() => {
-    axios
-    .get('http://localhost:3001/persons')
-    .then(response => setPersons(response.data))
+    phonebookServices.getAll()
+    .then(serverPersons => setPersons(serverPersons))
   })
 
   const handleNameChange = (event) => {
@@ -75,17 +25,53 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
-  const addName = (event) => {
-    event.preventDefault()
-    console.log({persons})
-    if(persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
-      setNewName('')
-    }else{
-      setPersons(persons.concat({name: newName, number: newNumber, id: persons.length+1}))
-      setNewName('')
-      setNewNumber('')
+  const handleDeletion = (id) => {
+
+    const person = persons.find(p => p.id === id)
+
+    if(window.confirm(`Do you really want to delete ${person.name} from the phonebook?`)){
+
+      phonebookServices.remove(id)
+      .then(id => {
+        const updatedPersons = persons.filter(p => p.id ==! id)
+        setPersons(updatedPersons)
+      })
+      .catch(error => {
+        alert(`The person ${person.name} has been previously removed from the phonebook.`)
+        const updatedPersons = persons.filter(p => p.id ==! id)
+        setPersons(updatedPersons)
+      })
     }
+  }
+
+  const addName = (event) => {
+
+    event.preventDefault()
+
+    const newPerson = {name: newName, number: newNumber}
+
+    if(persons.some(person => person.name === newName)) {
+      if(window.confirm(`${newName} is already added to phonebook, do you want to update the number?`)){
+        const id = persons.find(p => p.name === newName).id
+        phonebookServices.update(id, newPerson)
+        .then(returnedPerson => {
+          const updatedPersons = persons.map(p => p.name === returnedPerson.name ? returnedPerson : p)
+          setPersons(updatedPersons)
+        })
+      }
+    }
+    else{
+      phonebookServices.create(newPerson)
+      .then(newPerson => {
+        setPersons(persons.concat(newPerson))
+      }
+      )
+      .then(() => {
+        setNewName('')
+        setNewNumber('')
+      })
+    }
+
   }
 
 const handleFilterChange = (event) => {
@@ -102,7 +88,7 @@ const personsToShow = persons.filter(person => person.name.toLowerCase().startsW
       <h3>Add New</h3>
         <PersonForm submitHandler={addName} nameChangeHandler={handleNameChange} numberChangeHandler={handleNumberChange}/>
       <h2>Numbers</h2>
-        <Persons personsToShow={personsToShow}/>
+        <Persons personsToShow={personsToShow} deleteHandler={handleDeletion}/>
  
     </div>
   )
