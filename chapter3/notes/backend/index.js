@@ -23,30 +23,23 @@ app.get('/api/notes/:id', (request, response) => {
     response.json(note)
   })
 })
+  
+app.post('/api/notes', (request, response) => {
+  const body = request.body
 
-const generateId = () => {
-    const maxId = notes.length > 0
-      ? Math.max(...notes.map(n => n.id))
-      : 0
-    return String(maxId + 1)
+  if (body.content === undefined) {
+    return response.status(400).json({ error: 'content missing' })
   }
-  
-  app.post('/api/notes', (request, response) => {
-    const body = request.body
-  
-    if (body.content === undefined) {
-      return response.status(400).json({ error: 'content missing' })
-    }
-  
-    const note = new Note({
-      content: body.content,
-      important: body.important || false,
-    })
-  
-    note.save().then(savedNote => {
-      response.json(savedNote)
-    })
+
+  const note = new Note({
+    content: body.content,
+    important: body.important || false,
   })
+
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
+})
 
 app.delete('/api/notes/:id', (request, response) => {
     const id = request.params.id
