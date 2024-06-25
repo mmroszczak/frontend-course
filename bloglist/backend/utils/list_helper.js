@@ -1,3 +1,7 @@
+// Load the full build.
+var lodash = require('lodash')
+
+
 const dummy = (blogs) => {
     return 1
   }
@@ -13,12 +17,9 @@ const totalLikes = (blogs) => {
 const favoriteBlog = (blogs) => {
     if(blogs.length !==0){
         
-        console.log(blogs)
         const bestBlog = blogs.reduce((max, blog) => {
         return (blog.likes >= max.likes) ? blog : max
         }, blogs[0])
-
-        console.log(bestBlog)
         
         return {
             title: bestBlog.title,
@@ -31,8 +32,44 @@ const favoriteBlog = (blogs) => {
     }
 }
 
+const blogsByAuthor = (blogs) => {
+    if(blogs.length === 0) {
+        return "no blogs"
+    } else {
+        const blogCount = (lodash.countBy(blogs, "author"))
+
+        let max = 0
+        for (author in blogCount){
+            var mostBlogsAuthor = (blogCount[author] > max) ? author : max
+        }
+
+        return {author: mostBlogsAuthor, blogs: blogCount[mostBlogsAuthor]}
+
+    }
+}
+
+const likesByAuthor = (blogs) => {
+    if(blogs.length === 0) {
+        return "no blogs"
+    } else {
+        const groupedBlogs = lodash.groupBy(blogs, "author")
+
+        let max = 0
+        let mostLikedAuthor = {name: "", likes: 0}
+        for (author in groupedBlogs){
+            const likeSum = lodash.sumBy(groupedBlogs[author], "likes")
+            mostLikedAuthor = likeSum > max ? {name: author, likes: likeSum} : mostLikedAuthor
+            max = likeSum > max ? likeSum : max
+        }
+        console.log(mostLikedAuthor)
+        return mostLikedAuthor
+    }
+}
+
 module.exports = {
     dummy,
     totalLikes,
-    favoriteBlog
+    favoriteBlog,
+    blogsByAuthor,
+    likesByAuthor
   }

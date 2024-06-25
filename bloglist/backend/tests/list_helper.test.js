@@ -110,3 +110,40 @@ describe('favoriteBlog', () => {
   })
 
 })
+
+describe('blogsByAuthor', () => {
+  
+  test('When list has many blogs'), () => 
+    {const result = listHelper.blogsByAuthor(manyBlogs)
+    assert.deepStrictEqual(result, 
+      {
+      author: "Robert C. Martin",
+      blogs: 3
+    })}
+
+    test('When list is empty'), () => {
+      const result = listHelper.blogsByAuthor(noBlogs)
+      assert.strictEqual(result, "no blogs")
+    }
+
+
+})
+
+describe('likesByAuthor', () => {
+  
+  test('When list has many blogs'), () => 
+    {const result = listHelper.likesByAuthor(manyBlogs)
+    assert.deepStrictEqual(result, 
+      {
+        author: "Edsger W. Dijkstra",
+        likes: 17
+      }
+  )}
+
+    test('When list is empty'), () => {
+      const result = listHelper.likesByAuthor(noBlogs)
+      assert.strictEqual(result, "no blogs")
+    }
+
+
+})
