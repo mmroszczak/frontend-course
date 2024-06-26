@@ -1,14 +1,8 @@
 const mongoose = require('mongoose')
+require('dotenv').config()
 
-if (process.argv.length<3) {
-  console.log('give password as argument')
-  process.exit(1)
-}
 
-const password = process.argv[2]
-
-const url =
-  `mongodb+srv://nick:${password}@nickslearningsserver.naqeo9m.mongodb.net/noteApp?retryWrites=true&w=majority&appName=NicksLearningSserver`
+const url = process.env.TEST_MONGODB_URI
 
 mongoose.set('strictQuery',false)
 
@@ -21,15 +15,14 @@ const noteSchema = new mongoose.Schema({
 
 const Note = mongoose.model('Note', noteSchema)
 
-// const note = new Note({
-//   content: 'HTML is easy',
-//   important: true,
-// })
+const note = new Note({
+  content: 'Testing is important',
+  important: true,
+})
 
-// note.save().then(result => {
-//   console.log('note saved!')
-//   mongoose.connection.close()
-// })
+note.save().then(result => {
+  console.log('note saved!')
+})
 
 Note.find({}).then(result => {
     result.forEach(note => {
