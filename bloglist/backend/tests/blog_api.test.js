@@ -93,6 +93,39 @@ test('cant crreate blog without title or url', async () => {
 
 })
 
+test('delete a blog', async () => {
+    const blogs = await helper.blogsInDb()
+    const toDelete = blogs[0]
+
+    await api.delete(`/api/blogs/${toDelete.id}`).expect(204)
+
+    const blogsUpdated = await helper.blogsInDb()
+    assert.strictEqual(blogsUpdated.length, blogs.length-1)
+})
+
+test('update a blog', async () => {
+
+    const blogs = await helper.blogsInDb()
+    const toUpdate = blogs[0]
+
+
+    const newBlog = {
+        author: "new",
+        title: "old",
+        likes: 785991,
+        url: "url.co.uk"
+    }
+
+    const updatedBlog = await api
+    .put(`/api/blogs/${toUpdate.id}`)
+    .send(newBlog)
+
+    assert.strictEqual(updatedBlog.body.likes, 785991)
+    
+
+})
+
+
 after(async () => {
     await mongoose.connection.close()
 })
