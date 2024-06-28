@@ -9,3 +9,16 @@ content-type: application/json
     "author": "Ray Bradbury",
     "url": "http://raysblog.com",
     "likes": 17}
+
+####
+POST http://localhost:3001/api/users HTTP/1.1
+content-type: application/json
+
+{
+"name": "Mike",
+"username": "Mi",
+"password": "paawd"
+}
+
+###
+GET http://localhost:3001/api/users
