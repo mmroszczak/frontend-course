@@ -1,18 +1,29 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+const middleware = require('../utils/middleware')
 
 
 
 blogsRouter.get('/', async (request, response) => {
     
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1})
   response.json(blogs)
 })
   
   
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
 
   let body = request.body
+
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+
+  creator = request.user
+  body.user = creator.id
 
   if (!('title' in body)||!('url' in body)) {
     response.status(400).send()
@@ -25,30 +36,46 @@ blogsRouter.post('/', async (request, response) => {
     const blog = new Blog(body)
 
     const result = await blog.save()
+    creator.blogs = creator.blogs.concat(result._id)
+    await creator.save()
+
+
     response.status(201).json(result)
   }
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id',middleware.userExtractor, async (request, response) => {
+
+  const blog = await Blog.findById(request.params.id)
+  if(blog.user.toString() !== request.user._id.toString()) { response.status(401).json({error: "not authorised to delete"})}
+
 
   await Blog.findByIdAndDelete(request.params.id)
   response.status(204).send()
 
 })
 
-blogsRouter.put('/:id', async (request, response) => {
+blogsRouter.delete('/', async (request, response) => {
+  await Blog.deleteMany({})
+  response.status(204).send()
+})
+
+blogsRouter.put('/:id',middleware.userExtractor, async (request, response) => {
   
+  const blog = await Blog.findById(request.params.id)
+  if(blog.user.toString() !== request.user._id.toString()) { response.status(401).json({error: "not authorised to update"})}
+
   
   const body = request.body
 
 
-  const blog = {
+  const newBlog = {
     author: body.author, 
     url: body.url,
     title: body.title, 
     likes: body.likes
   }
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true })
 
 
   response.json(updatedBlog)

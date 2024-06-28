@@ -3,22 +3,47 @@ GET http://localhost:3001/api/blogs
 ###
 POST http://localhost:3001/api/blogs HTTP/1.1
 content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1pa2siLCJpZCI6IjY2N2U4ODFkZjU5YmM1ZGI4MTYwNDFiMiIsImlhdCI6MTcxOTU2ODQzOH0.09OmgjcbjmMWv9IAsN1QezEqLBdajGsmM1XqGJxht60
 
 {
-    "title": "Blog 4",
-    "author": "Ray Bradbury",
-    "url": "http://raysblog.com",
-    "likes": 17}
+    "title": "Blog 111",
+    "author": "me",
+    "url": "http://nicksblog.com",
+    "likes": 784}
 
-####
+### Delete All Blogs to clear the DB
+DELETE http://localhost:3001/api/blogs/667e89219dda549dc4315ae3
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1pa2siLCJpZCI6IjY2N2U4ODFkZjU5YmM1ZGI4MTYwNDFiMiIsImlhdCI6MTcxOTU2ODQzOH0.09OmgjcbjmMWv9IAsN1QezEqLBdajGsmM1XqGJxht60
+
+
+###
 POST http://localhost:3001/api/users HTTP/1.1
 content-type: application/json
 
 {
 "name": "Mike",
-"username": "Mi",
+"username": "Mikk",
 "password": "paawd"
 }
 
 ###
 GET http://localhost:3001/api/users
+
+### Log In
+POST http://localhost:3001/api/login/
+content-type: application/json
+
+{
+"username": "admin",
+"password": "password"
+}
+
+
+### Log In
+POST http://localhost:3001/api/login/
+content-type: application/json
+
+{
+"username": "Mikk",
+"password": "paawd"
+}
