@@ -63,8 +63,6 @@ blogsRouter.delete('/', async (request, response) => {
 blogsRouter.put('/:id',middleware.userExtractor, async (request, response) => {
   
   const blog = await Blog.findById(request.params.id)
-  if(blog.user.toString() !== request.user._id.toString()) { response.status(401).json({error: "not authorised to update"})}
-
   
   const body = request.body
 
@@ -75,7 +73,7 @@ blogsRouter.put('/:id',middleware.userExtractor, async (request, response) => {
     title: body.title, 
     likes: body.likes
   }
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true })
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true }).populate('user', { username: 1, name: 1})
 
 
   response.json(updatedBlog)
