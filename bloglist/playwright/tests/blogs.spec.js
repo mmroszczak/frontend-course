@@ -3,8 +3,8 @@ const { test, expect, beforeEach, describe } = require('@playwright/test')
 describe('Blog app', () => {
   
     beforeEach(async ({ page, request }) => {
-        await request.post('http://localhost:3001/api/testing/reset' )
-        console.log(await request.get('http://localhost:3001/api/users'))
+        await request.post('http://localhost:3001/api/testing/reset')
+        await request.post('http://localhost:3001/api/testing/make')
         await request.post('http://localhost:3001/api/users', {
           data: {
             name: 'Admin',
@@ -60,6 +60,49 @@ describe('Blog app', () => {
             await page.getByRole('button', { name: 'create' }).click()
             await expect(page.getByText('playwright-title')).toBeVisible()
             await expect(page.getByText('playwright-author')).toBeVisible()
+        })
+
+        test('a blog can be liked', async ({ page }) => {
+            await page.getByRole('button', { name: 'New Blog' }).click()
+            await page.getByTestId('new-title').fill('playwright-title')
+            await page.getByTestId('new-author').fill('playwright-author')
+            await page.getByTestId('new-url').fill('playwright-url')
+            await page.getByRole('button', { name: 'create' }).click()
+            await page.getByRole('button', { name: 'like' }).click()
+            
+            await expect(page.getByText('Added like')).toBeVisible()
+
+
+        })
+
+        test('only user who created blog can delete', async ({ page }) => {
+            await page.getByRole('button', { name: 'New Blog' }).click()
+            await page.getByTestId('new-title').fill('playwright-title')
+            await page.getByTestId('new-author').fill('playwright-author')
+            await page.getByTestId('new-url').fill('playwright-url')
+            await page.getByRole('button', { name: 'create' }).click()
+            await page.getByRole('button', { name: 'Log Out' }).click()
+            await page.getByTestId('username').fill('user')
+            await page.getByTestId('password').fill('userpassword')
+            await page.getByRole('button', { name: 'login' }).click()
+            await expect(page.getByText('delete')).not.toBeVisible()
+
+        })
+
+        test('the blogs are arranged by likes', async ({ page, request }) => {
+            
+              
+            const viewButtons = await page.getByRole('button').getByText('view').all()
+            const likes = [10, 5, 0]
+
+            for (const button in viewButtons) {
+            await button.click()
+            }
+
+            const blogdivs = await page.locator('.blog')
+
+
+
         })
       })
 
