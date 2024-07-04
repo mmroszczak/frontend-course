@@ -4,7 +4,6 @@ describe('Blog app', () => {
   
     beforeEach(async ({ page, request }) => {
         await request.post('http://localhost:3001/api/testing/reset')
-        await request.post('http://localhost:3001/api/testing/make')
         await request.post('http://localhost:3001/api/users', {
           data: {
             name: 'Admin',
@@ -89,17 +88,39 @@ describe('Blog app', () => {
 
         })
 
-        test('the blogs are arranged by likes', async ({ page, request }) => {
+        test('the blogs are arranged by likes', async ({ page }) => {
             
-              
-            const viewButtons = await page.getByRole('button').getByText('view').all()
-            const likes = [10, 5, 0]
+            
+            await page.getByRole('button', { name: 'New Blog' }).click()
+            await page.getByTestId('new-title').fill('a')
+            await page.getByTestId('new-author').fill('a')
+            await page.getByTestId('new-url').fill('a')
+            await page.getByRole('button', { name: 'create' }).click()
 
-            for (const button in viewButtons) {
-            await button.click()
+
+            await page.getByRole('button', { name: 'New Blog' }).click()
+            await page.getByTestId('new-title').fill('c')
+            await page.getByTestId('new-author').fill('c')
+            await page.getByTestId('new-url').fill('c')
+            await page.getByRole('button', { name: 'create' }).click()
+
+            const likeButtons = await page.getByRole('button', { name: 'like' }).all()
+            const likes = [10, 5]
+
+            for await (const index of [0, 1]) {
+                for (let i = 0; i < likes[index]; i++) {
+                    await likeButtons[index].click()
+                  }
+                
             }
 
-            const blogdivs = await page.locator('.blog')
+
+
+            const viewButtons = await page.getByRole('button', { name: 'view' }).all()
+
+            for (const button in viewButtons) {
+                await button.click()
+            }
 
 
 
